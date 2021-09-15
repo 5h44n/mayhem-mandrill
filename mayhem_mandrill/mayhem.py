@@ -20,9 +20,11 @@ class PubSubMessage:
     message_id    = attr.ib(repr=False)
     hostname      = attr.ib(repr=False, init=False)
     restarted = attr.ib(repr=False, default=False)
+    saved = attr.ib(repr=False, default=False)
 
     def __attrs_post_init__(self):
         self.hostname = f"{self.instance_name}.example.net"
+
 
 async def consume(queue):
     """
@@ -35,7 +37,11 @@ async def consume(queue):
         msg = await queue.get()
         logging.info(f"Consumed {msg}")
 
+        # restarting a host and saving an obj to the database using that host are treated as separate, independent
+        # processes. if they were dependent you would await these coroutines sequentially
         asyncio.create_task(restart_host(msg))
+        asyncio.create_task(save(msg))
+
 
 async def publish(queue):
     """
@@ -65,9 +71,23 @@ async def restart_host(msg):
     args:
         msg (PubSubMessage): consumed event message for a particular host to be restarted.
     """
+    # simulates variable time it takes to restart a host
     await asyncio.sleep(random.random())
     msg.restarted = True
     logging.info(f"Restarted {msg.hostname}")
+
+
+async def save(msg):
+    """
+    Save something to a database.
+
+    args:
+        msg (PubSubMessage): consumed event message for a particular host to be restarted.
+    """
+    # simulates variable time it takes to persist a record to a database
+    await asyncio.sleep(random.random())
+    msg.saved = True
+    logging.info(f"Saved {msg} into database")
 
 
 def main():
