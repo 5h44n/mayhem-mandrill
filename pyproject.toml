@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "mayhem-mandrill"
+version = "0.1.0"
+description = ""
+authors = ["Shaan Savarirayan <shaan.savarirayan@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+attrs = "^21.2.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[tool.poetry.scripts]
+mayhem_01 = "mayhem_mandrill.mayhem_1:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
