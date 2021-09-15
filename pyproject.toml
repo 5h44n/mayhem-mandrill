@@ -12,11 +12,12 @@ attrs = "^21.2.0"
 pytest = "^5.2"
 
 [tool.poetry.scripts]
-mayhem_1 = "mayhem_mandrill.mayhem_1:main"
-mayhem_2 = "mayhem_mandrill.mayhem_2:main"
-mayhem_3 = "mayhem_mandrill.mayhem_3:main"
-mayhem_4 = "mayhem_mandrill.mayhem_4:main"
-non_concurrent = "mayhem_mandrill.non_concurrent_mayhem:main"
+mayhem_1 = "mayhem_mandrill.part_0.mayhem_1:main"
+mayhem_2 = "mayhem_mandrill.part_0.mayhem_2:main"
+mayhem_3 = "mayhem_mandrill.part_0.mayhem_3:main"
+mayhem_4 = "mayhem_mandrill.part_0.mayhem_4:main"
+non_concurrent = "mayhem_mandrill.part_0.non_concurrent_mayhem:main"
+concurrent = "mayhem_mandrill.part_1.mayhem_5:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
