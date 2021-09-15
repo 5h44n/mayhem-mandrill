@@ -12,12 +12,7 @@ attrs = "^21.2.0"
 pytest = "^5.2"
 
 [tool.poetry.scripts]
-0_1 = "mayhem_mandrill.part_0.mayhem_1:main"
-0_2 = "mayhem_mandrill.part_0.mayhem_2:main"
-0_3 = "mayhem_mandrill.part_0.mayhem_3:main"
-0_4 = "mayhem_mandrill.part_0.mayhem_4:main"
-1_1 = "mayhem_mandrill.part_1.mayhem_1:main"
-1_2 = "mayhem_mandrill.part_1.mayhem_2:main"
+mayhem = "mayhem_mandrill.mayhem:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
