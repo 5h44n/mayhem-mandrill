@@ -15,6 +15,7 @@ pytest = "^5.2"
 mayhem_1 = "mayhem_mandrill.mayhem_1:main"
 mayhem_2 = "mayhem_mandrill.mayhem_2:main"
 mayhem_3 = "mayhem_mandrill.mayhem_3:main"
+mayhem_4 = "mayhem_mandrill.mayhem_4:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
