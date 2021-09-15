@@ -54,12 +54,14 @@ async def consume(queue):
 def main():
     start_time = time.time()
     queue = asyncio.Queue()
-    asyncio.run(publish(queue, 5))
-    asyncio.run(consume(queue))
-
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(publish(queue, 5))
+    loop.run_until_complete(consume(queue))
+    loop.close()
     duration = time.time() - start_time
 
     logging.info(f'Successfully shutdown the Mayhem service after {duration} seconds.')
+
 
 if __name__ == '__main__':
     main()
