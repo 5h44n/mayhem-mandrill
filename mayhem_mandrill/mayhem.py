@@ -19,17 +19,30 @@ class PubSubMessage:
     instance_name = attr.ib()
     message_id    = attr.ib(repr=False)
     hostname      = attr.ib(repr=False, init=False)
+    restarted = attr.ib(repr=False, default=False)
 
     def __attrs_post_init__(self):
         self.hostname = f"{self.instance_name}.example.net"
 
+async def consume(queue):
+    """
+    Simulates a consumer that restarts a host when it receives a message
+
+    args:
+        queue (asyncio.Queue): Queue to consume messages from.
+    """
+    while True:
+        msg = await queue.get()
+        logging.info(f"Consumed {msg}")
+
+        asyncio.create_task(restart_host(msg))
 
 async def publish(queue):
     """
     Simulates an external publisher of messages.
 
     args:
-    queue (asyncio.Queue): Queue to publish messages to.
+        queue (asyncio.Queue): Queue to publish messages to.
     """
     choices = string.ascii_lowercase + string.digits
 
@@ -40,9 +53,21 @@ async def publish(queue):
         msg = PubSubMessage(message_id=msg_id, instance_name=instance_name)
         # publish an item
         asyncio.create_task(queue.put(msg))
-        logging.info(f"Published message {msg}")
+        logging.debug(f"Published message {msg}")
         # simulate randomness of publishing messages
         await asyncio.sleep(random.random())
+
+
+async def restart_host(msg):
+    """
+    Restart a given host.
+
+    args:
+        msg (PubSubMessage): consumed event message for a particular host to be restarted.
+    """
+    await asyncio.sleep(random.random())
+    msg.restarted = True
+    logging.info(f"Restarted {msg.hostname}")
 
 
 def main():
@@ -51,6 +76,7 @@ def main():
 
     try:
         loop.create_task(publish(queue))
+        loop.create_task(consume(queue))
         loop.run_forever()
     except KeyboardInterrupt:
         logging.info("Process interrupted")
