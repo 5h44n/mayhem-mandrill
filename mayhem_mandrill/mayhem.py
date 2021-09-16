@@ -54,7 +54,7 @@ async def save(msg):
     logging.info(f"Saved {msg} into database")
 
 
-def cleanup(msg, fut):
+async def cleanup(msg):
     """
     Cleanup tasks related to completing work on a message.
 
@@ -63,26 +63,20 @@ def cleanup(msg, fut):
             processed.
         fut (asyncio.Future): future provided by the callback.
     """
+    await asyncio.sleep(random.random())
     msg.acked = True
     logging.info(f"Done. Acked {msg}")
 
 
 async def handle_message(msg):
     """
-
     Kick off tasks for a given message.
 
     args:
         msg (PubSubMessage): consumed message to process.
     """
-    # a single future-like object that combines `save()` and `restart_host` as independent tasks
-    g_future = asyncio.gather(save(msg), restart_host(msg))
-
-    callback = functools.partial(cleanup, msg)
-
-    # adds a callback run on completion of the future-like object's tasks
-    g_future.add_done_callback(callback)
-    await g_future
+    await asyncio.gather(save(msg), restart_host(msg))
+    await cleanup(msg)
 
 
 async def consume(queue):
