@@ -23,6 +23,7 @@ class PubSubMessage:
     restarted = attr.ib(repr=False, default=False)
     saved = attr.ib(repr=False, default=False)
     acked = attr.ib(repr=False, default=False)
+    extended_cnt = attr.ib(repr=False, default=0)
 
     def __attrs_post_init__(self):
         self.hostname = f"{self.instance_name}.example.net"
@@ -63,9 +64,25 @@ async def cleanup(msg):
             processed.
         fut (asyncio.Future): future provided by the callback.
     """
+    # blocks rest of the coroutine until `event.set` is called
+    await event.wait()
     await asyncio.sleep(random.random())
     msg.acked = True
     logging.info(f"Done. Acked {msg}")
+
+
+async def extend(msg, event):
+    """
+    Periodically extend the message acknowledgement deadline.
+
+    args:
+        msg (PubSubMessage): consumed event message to extend.
+        event (asyncio.Event): event to watch for message extension or cleaning up.
+    """
+    while not event.is_set():
+        msg.extended_cnt += 1
+        logging.info(f"Extended deadline by 3 seconds for {msg}")
+        await asyncio.sleep(2)
 
 
 async def handle_message(msg):
@@ -75,8 +92,10 @@ async def handle_message(msg):
     args:
         msg (PubSubMessage): consumed message to process.
     """
+    event = asyncio.Event()
+    asyncio.create_task(extend(msg, event))
     await asyncio.gather(save(msg), restart_host(msg))
-    await cleanup(msg)
+    event.set()
 
 
 async def consume(queue):
