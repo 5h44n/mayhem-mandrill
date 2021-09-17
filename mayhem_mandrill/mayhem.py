@@ -1,9 +1,10 @@
 import asyncio
+import functools
 import logging
 import random
+import signal
 import string
 import uuid
-import functools
 
 import attr
 
@@ -135,16 +136,36 @@ async def publish(queue):
         await asyncio.sleep(random.random())
 
 
+async def shutdown(signal, loop):
+    """Cleanup tasks tied to the serivces's shutdown"""
+    logging.info(f"Recieved exit signal {signal.name}...")
+    logging.info("Closing database connections")
+    logging.info("Nacking outstanding messages")
+    tasks = [t for t in asyncio.all_tasks() if t is not asyncio.current_task()]
+    [task.cancel() for task in tasks]
+
+    logging.info(f"Cancelling {len(tasks)} outstanding tasks")
+    await asyncio.gather(*tasks)
+    logging.info("Flushing metrics")
+    loop.stop()
+
+
 def main():
-    queue = asyncio.Queue()
     loop = asyncio.get_event_loop()
 
+    signals = [signal.SIGHUP, signal.SIGTERM, signal.SIGINT]
+
+    for s in signals:
+        loop.add_signal_handler(
+            s,
+            lambda s=s: asyncio.create_task(shutdown(s, loop))
+        )
+
+    queue = asyncio.Queue()
     try:
         loop.create_task(publish(queue))
         loop.create_task(consume(queue))
         loop.run_forever()
-    except KeyboardInterrupt:
-        logging.info("Process interrupted")
     finally:
         loop.close()
         logging.info("Successfully shutdown the Mayhem service.")
