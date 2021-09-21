@@ -145,7 +145,7 @@ async def shutdown(signal, loop):
     [task.cancel() for task in tasks]
 
     logging.info(f"Cancelling {len(tasks)} outstanding tasks")
-    await asyncio.gather(*tasks)
+    await asyncio.gather(*tasks, return_exceptions=True)
     logging.info("Flushing metrics")
     loop.stop()
 
